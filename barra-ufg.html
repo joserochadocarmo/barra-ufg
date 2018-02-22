@@ -7,7 +7,8 @@
 <link rel="import" href="https://cdn.rawgit.com/download/polymer-cdn/1.5.0/lib/paper-item/paper-item.html">
 
 <dom-module id="barra-ufg">
-    <style is="custom-style">
+    <template>
+        <style is="custom-style">
         paper-toolbar {
             background-color: #24292e;
         }
@@ -15,7 +16,6 @@
         color:white
         }
     </style>
-    <template>
 <paper-toolbar>
     <paper-icon-button icon="menu" on-tap="menuAction"></paper-icon-button>
     <div class="title">{{title}}</div>
