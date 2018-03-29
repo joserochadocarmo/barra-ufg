@@ -9,40 +9,41 @@
 <dom-module id="barra-ufg">
     <template>
         <style is="custom-style">
-        paper-toolbar {
-            background-color: #24292e;
-        }
-        a{
-        color:white
-        }
-    </style>
-<paper-toolbar>
-    <paper-icon-button icon="menu" on-tap="menuAction"></paper-icon-button>
-    <div class="title">{{title}}</div>
-    <a href="[[rootPath]]/graph" tabindex="-1">
-      <paper-item raised>
-      <iron-icon icon="launch"></iron-icon>
-      Visualize</paper-item>
-    </a>
-    <paper-menu-button horizontal-align="left" horizontal-offset="-100">
-        <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
-        <paper-menu class="dropdown-content">
-            <paper-item onClick="var api = prompt('Entre com sua api key')">Api Key</paper-item>
-            <paper-item>Configurações</paper-item>
-            <paper-item>Ajuda</paper-item>
-        </paper-menu>
-    </paper-menu-button>
-</paper-toolbar>
+            paper-toolbar {
+                background-color: var(--background-color, #24292e);
+            }
+
+            a {
+                color: var(--color, #24292e);
+            }
+        </style>
+        <paper-toolbar>
+            <paper-icon-button icon="menu" on-tap="menuAction"></paper-icon-button>
+            <div class="title">{{title}}</div>
+            <paper-menu-button horizontal-align="left" horizontal-offset="-100">
+                <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
+                <paper-menu class="dropdown-content">
+                    <a href="[[rootPath]]/graph" tabindex="-1">
+                        <paper-item raised>
+                            <iron-icon icon="launch"></iron-icon>Visualize
+                        </paper-item>
+                    </a>
+                    <paper-item onClick="var api = prompt('Entre com sua api key')">Api Key</paper-item>
+                    <paper-item>Configurações</paper-item>
+                    <paper-item>Ajuda</paper-item>
+                </paper-menu>
+            </paper-menu-button>
+        </paper-toolbar>
     </template>
     <script>
-      Polymer({
-        is: 'barra-ufg',
-        properties: {
-          title: {
-            type: String,
-            value: "INTEGRA - UFG"
-          }
-        }
-      });
+        Polymer({
+            is: 'barra-ufg',
+            properties: {
+                title: {
+                    type: String,
+                    value: "INTEGRA - UFG"
+                }
+            }
+        });
     </script>
-  </dom-module>
+</dom-module>
