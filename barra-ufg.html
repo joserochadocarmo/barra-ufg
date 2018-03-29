@@ -10,13 +10,14 @@
     <template>
         <style is="custom-style">
             paper-toolbar {
-                background-color: var(--background-color, #24292e);
+                --paper-toolbar-background: var(--background-color, #24292e);
             }
 
             a {
                 color: var(--color, #24292e);
             }
         </style>
+        
         <paper-toolbar>
             <paper-icon-button icon="menu" on-tap="menuAction"></paper-icon-button>
             <div class="title">{{title}}</div>
