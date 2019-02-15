@@ -1,0 +1,206 @@
+<html>
+
+<head>
+    <title>Firebase Login</title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes" />
+
+    <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.12.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/ui/2.7.0/firebase-ui-auth__pt.js"></script>
+    <script src="https://smartlock.google.com/client" async defer></script>
+
+    <script src="https://unpkg.com/dexie@2.0.2/dist/dexie.min.js" async defer></script>
+
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/2.7.0/firebaseui.css" />
+    <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.5.2/animate.min.css" />
+
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyAXZfyx1shQBDZ3THbqdQnEaHUqFaPGX8g",
+            authDomain: "project-7228392500579219360.firebaseapp.com",
+            databaseURL: "https://project-7228392500579219360.firebaseio.com",
+            projectId: "project-7228392500579219360",
+            storageBucket: "project-7228392500579219360.appspot.com",
+            messagingSenderId: "709259484417"
+        };
+        firebase.initializeApp(config);
+    </script>
+
+    <script type="text/javascript">
+        // FirebaseUI config.
+        var uiConfig = {
+            signInSuccessUrl: 'https://localhost:3000/home',
+            signInOptions: [
+                // Leave the lines as is for the providers you want to offer your users.
+                {
+                    provider: firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+                    // Required to enable this provider in One-Tap Sign-up.
+                    authMethod: 'https://accounts.google.com',
+                    // Required to enable ID token credentials for this provider.
+                    clientId: "709259484417-gfk9skc414pj8tcrod28lrcmeik5264o.apps.googleusercontent.com"
+                },
+                firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+                firebase.auth.TwitterAuthProvider.PROVIDER_ID,
+                //firebase.auth.GithubAuthProvider.PROVIDER_ID,
+                firebase.auth.EmailAuthProvider.PROVIDER_ID,
+                {
+                    provider: firebase.auth.PhoneAuthProvider.PROVIDER_ID,
+                    defaultCountry: 'BR', // Set default country to the United Kingdom (+44).
+                }
+            ],
+            callbacks: {
+                signInSuccessWithAuthResult: function (authResult, redirectUrl) {
+                    var signInSuccess = true;
+                    var user = authResult.user;
+                    var credential = authResult.credential;
+                    var isNewUser = authResult.additionalUserInfo.isNewUser;
+                    var providerId = authResult.additionalUserInfo.providerId;
+                    var operationType = authResult.operationType;
+                    if (!user.emailVerified && providerId != 'phone') {
+                        signInSuccess = false;
+                        var actionCodeSettings = {
+                            //url: 'https://localhost:3000/login?email=' + firebase.auth().currentUser.email
+                            url: 'https://localhost:3000/home'
+                        };
+                        firebase.auth().currentUser.sendEmailVerification(actionCodeSettings).then(function () {
+                            document.getElementById("msg").innerHTML = "Email de ativação enviado, verifique seu email!!";
+                            //.getCurrentUser().reload()
+                        }).catch(function (error) {
+                            console.log(error);
+                        });
+                    }
+                    user.getIdToken().then(function (accessToken) {
+                        var userData = {
+                            displayName: user.displayName,
+                            email: user.email,
+                            emailVerified: user.emailVerified,
+                            photoURL: user.photoURL,
+                            uid: user.uid,
+                            phoneNumber: user.phoneNumber,
+                            providerData: user.providerData,
+                            accessToken: accessToken
+                        };
+                        //localStorage.setItem('dados', JSON.stringify(userData));
+                    });
+                    // Do something with the returned AuthResult.
+                    // Return type determines whether we continue the redirect automatically
+                    // or whether we leave that to developer to handle.
+                    return signInSuccess;
+                },
+                signInFailure: function (error) {
+                    // Some unrecoverable error occurred during sign-in.
+                    // Return a promise when error handling is completed and FirebaseUI
+                    // will reset, clearing any UI. This commonly occurs for error code
+                    // 'firebaseui/anonymous-upgrade-merge-conflict' when merge conflict
+                    // occurs. Check below for more details on this.
+                    //localStorage.removeItem('dados');
+                    return handleUIError(error);
+                },
+                uiShown: function () {
+                    // The widget is rendered.
+                    // Hide the loader.  
+                    //document.getElementById('loader').style.display = 'none';
+                }
+            },
+            signInFlow: 'redirect',
+            // Terms of service url.
+            tosUrl: '<your-tos-url>',
+            //credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO
+        };
+        //firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        // Initialize the FirebaseUI Widget using Firebase.
+        var ui = new firebaseui.auth.AuthUI(firebase.auth());
+        // The start method will wait until the DOM is loaded.
+        ui.start('#firebaseui-auth-container', uiConfig);
+        // Disable auto-sign in.
+        ui.disableAutoSignIn();
+    </script>
+
+    <script type="text/javascript">
+        initApp = function () {
+            var currentUid = null;
+            firebase.auth().onAuthStateChanged(function (user) {
+                if (user && user.emailVerified && user.uid != currentUid) {
+                    //window.location = '/home';
+                } else {
+                    currentUid = null;
+                }
+            }, function (error) {
+                console.log(error);
+            });
+        };
+        window.addEventListener('load', function () {
+            initApp();
+        });
+        var db = new Dexie('firebaseLocalStorageDb');
+        db.version(0.1).stores({
+            firebaseLocalStorage: "fbase_key"
+        });
+
+        // Following operation will be queued until we're finished populating data:
+        db.firebaseLocalStorage.each(function (obj) {
+            // When we come here, data is fully populated and we can log all objects.
+            console.log("Found object: " + JSON.stringify(obj));
+        }).then(function () {
+            console.log("Finished.");
+        }).catch(function (error) {
+            // In our each() callback above fails, OR db.open() fails due to any reason,
+            // including our ajax call failed, this operation will fail and we will get
+            // the error here!
+            console.error(error.stack || error);
+            // Note that we could also have catched it on db.open() but in this sample,
+            // we show it here.
+        });
+    </script>
+    <!-- http://i.imgur.com/Eor57Ae.jpg https://i.imgur.com/fd8Lcso.png
+        https://lh4.googleusercontent.com/-XplyTa1Za-I/VMSgIyAYkHI/AAAAAAAADxM/oL-rD6VP4ts/w1184-h666/Android-Lollipop-wallpapers-Google-Now-Wallpaper-2.png
+        http://pearl.stylemixthemes.com/restaurant/wp-content/uploads/sites/9/2017/07/fp_slide_1.jpg
+        http://resca.thimpress.com/wp-content/uploads/revslider/parallax_scroll_slider/hero_slide_1.jpg
+    -->
+    <style>
+        body {
+            background: url('https://lh4.googleusercontent.com/-XplyTa1Za-I/VMSgIyAYkHI/AAAAAAAADxM/oL-rD6VP4ts/w1184-h666/Android-Lollipop-wallpapers-Google-Now-Wallpaper-2.png') no-repeat fixed center center;
+            background-size: cover;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .logo {
+            width: 217px;
+            height: 36px;
+            background: url('https://i.imgur.com/fd8Lcso.png') no-repeat;
+            background-size: cover;
+            margin: 20px auto;
+        }
+
+        @media screen and (min-width: 600px) {
+            .logo {
+                margin: 80px auto;
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            font-size: 18px;
+            text-transform: uppercase;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/login">
+        <div class="logo"></div>
+    </a>
+
+    <div class="animated fadeIn">
+        <h1 id="msg">Contas para Login</h1>
+        <div id="firebaseui-auth-container"></div>
+    </div>
+</body>
+
+</html>
